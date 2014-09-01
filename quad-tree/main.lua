@@ -10,7 +10,7 @@ function collides(b1, b2)
   if b1[1] > b2[1] + b2[3] then return false end
   if b1[1] + b1[3] < b2[1] then return false end
   if b1[2] > b2[2] + b2[4] then return false end
-  if b1[2] + b1[4] < b1[2] then return false end
+  if b1[2] + b1[4] < b2[2] then return false end
   return true
 end
 
@@ -64,7 +64,7 @@ function query_area(q, bound)
     end
   else
     for i = 1, #q.elem do
-      if contains(bound, q.elem[i]) then
+      if collides(bound, q.elem[i]) then
         cur = push(cur, {q.elem[i]})
       end
     end
@@ -75,13 +75,14 @@ end
 quad = raw_q{0, 0, 800, 600}
 size = 30
 elems = {}
+math.randomseed(os.time())
 local r = math.random
 r() r()
 local red = {255, 0, 0}
 local white = {255, 255, 255}
 local green = {0, 255, 0}
 for i = 1, 100 do
-  local e = {r(800-size), r(600-size)}
+  local e = {r(800-size), r(600-size), size, size}
   e.color = white
   elems[#elems + 1] = e
   add_point(quad, e)
@@ -89,8 +90,8 @@ end
 
 for i = 1, 100 do
   local e = elems[i]
-  local q = query_area(quad, {e[1], e[2], size, size}).next
-  if q.next then e.color = red end
+  local q = query_area(quad, e).next
+  if q.next then e.color = green end
   while q.next do
     q = q.next
     q[1].color = red
@@ -112,6 +113,6 @@ function love.draw()
   draw_quad(quad, {0, 255, 0, 100})
   for _, e in ipairs(elems) do
     love.graphics.setColor(e.color)
-    love.graphics.rectangle('fill', e[1], e[2], size, size)
+    love.graphics.rectangle('fill', unpack(e))
   end
 end
