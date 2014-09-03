@@ -1,4 +1,5 @@
-local LIMIT = 5
+local LIMIT = 6
+local MAX_LEVEL = 6
 
 local QuadTree = {}
 
@@ -17,7 +18,8 @@ local function collidesRect(a, b)
 	return true
 end
 
-function QT:init(bounds)
+function QT:init(bounds, level)
+	self.level = level or 1
 	self.bounds = bounds
 	self.bodies = {}
 	return self
@@ -27,10 +29,10 @@ function QT:subdivide()
 	local b = self.bounds
 	local w2, h2 = b[3]/2, b[4]/2
 	self.sect = {
-		QuadTree.new{b[1], b[2], w2, h2},
-		QuadTree.new{b[1] + w2, b[2], w2, h2},
-		QuadTree.new{b[1], b[2] + h2, w2, h2},
-		QuadTree.new{b[1] + w2, b[2] + h2, w2, h2}
+		QuadTree.new({b[1], b[2], w2, h2}, self.level + 1),
+		QuadTree.new({b[1] + w2, b[2], w2, h2}, self.level + 1),
+		QuadTree.new({b[1], b[2] + h2, w2, h2}, self.level + 1),
+		QuadTree.new({b[1] + w2, b[2] + h2, w2, h2}, self.level + 1)
 	}
 
 	for _, rect in ipairs(self.bodies) do
@@ -50,7 +52,7 @@ function QT:add(rect)
 
 	self.bodies[#self.bodies + 1] = rect
 
-	if #self.bodies > LIMIT then
+	if self.level < MAX_LEVEL and #self.bodies > LIMIT then
 		self:subdivide()
 	end
 end
