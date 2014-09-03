@@ -1,4 +1,4 @@
-local LIMIT = 6
+local LIMIT = 5
 
 local QuadTree = {}
 
@@ -42,7 +42,7 @@ function QT:subdivide()
 end
 
 function QT:add(rect)
-	if not collidesRect(rect, self.bounds) then return end
+	if not collidesRect(rect.rect, self.bounds) then return end
 	if self.sect then
 		for i = 1, 4 do self.sect[i]:add(rect) end
 		return
@@ -65,7 +65,7 @@ function QT:query(table, rect)
 		end
 	else
 		for _, r in ipairs(self.bodies) do
-			if not table[r] and collidesRect(r, rect) then
+			if not table[r] and collidesRect(r.rect, rect) then
 				table[r] = true
 				count = count + 1
 			end
