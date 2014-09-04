@@ -39,11 +39,7 @@ function automaton:transform()
 				end
 			end
 
-			if (encounters > limitant) or current[i][j] then
-				transformed[i][j] = true
-			else
-				transformed[i][j] = false
-			end
+			transformed[i][j] = (encounters > limitant) or current[i][j]
 		end
 	end
 
@@ -54,12 +50,15 @@ end
 function automaton:next()
 	self:transform()
 	self.stack_index = (self.stack_index+1)%(self.stack.size)
-	return self.stack[self.stack_index]
+	return self.stack[self.stack_index+1]
 end
 
 function automaton:prev()
+	if self.stack.size < 2 then return self.current end
 	self.stack_index = (self.stack_index-1)%(self.stack.size)
-	return self.stack[self.stack_index]
+	self.stack:pop()
+	self.current = self.stack:peek()
+	return self.current
 end
 
 function CellAutomaton.new(map, _width, _height)

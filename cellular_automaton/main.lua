@@ -41,6 +41,25 @@ function love.update(dt)
 	end
 end
 
+local function apply_automaton(action)
+	if diff then
+		print("Diff. Recreating...")
+		automaton = CellAutomaton.new(map, width, height)
+	end
+
+	print("Applying...")
+	
+	if action then
+		map = automaton:next()
+	else
+		map = automaton:prev()
+	end
+
+	print("Done")
+	
+	diff = false
+end
+
 function love.keyreleased(key)
 	if key == "escape" then
 		love.event.quit()
@@ -53,27 +72,9 @@ function love.keyreleased(key)
 	elseif key == 'g' then
 		grid_mode = not grid_mode
 	elseif key == '.' then
-		if diff then
-			print("Diff. Recreating...")
-			cell_automaton = CellAutomaton.new(map, width, height)
-		end
-
-		print("Applying...")
-		map = cell_automaton:next()
-		print("Done")
-		
-		diff = false
+		apply_automaton(true)
 	elseif key == ',' then
-		if diff then
-			print("Diff. Recreating...")
-			cell_automaton = CellAutomaton.new(map, width, height)
-		end
-
-		print("Applying...")
-		map = cell_automaton:prev()
-		print("Done")
-		
-		diff = false
+		apply_automaton(false)
 	end
 end
 
