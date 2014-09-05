@@ -17,6 +17,21 @@ local grid_mode = false
 local automaton = nil
 -- Modification marker.
 local diff = true
+-- Random generator.
+local random = nil
+
+-- Here goes all the Cellular Automaton configuration options:
+
+-- Randomization properties
+local randomization_density = 0.05
+-- Algorithm properties
+local automaton_properties = {
+	auto_remove = true,
+	neighbouring = 4,
+	limitant = 2
+}
+
+-- No more Cellular Automaton configuration options. Ye be forbidden to booty down 'ere! D:<
 
 function love.load()
 	for i=0, width-1 do
@@ -25,6 +40,8 @@ function love.load()
 			map[i][j] = false
 		end
 	end
+
+	random = RandomGenerator.new(randomization_density)
 end
 
 function love.update(dt)
@@ -44,7 +61,8 @@ end
 local function apply_automaton(action)
 	if diff then
 		print("Diff. Recreating...")
-		automaton = CellAutomaton.new(map, width, height)
+		automaton = CellAutomaton.new(map, width, height, automaton_properties)
+		map = automaton:next()
 	end
 
 	print("Applying...")
@@ -75,6 +93,9 @@ function love.keyreleased(key)
 		apply_automaton(true)
 	elseif key == ',' then
 		apply_automaton(false)
+	elseif key == 'r' then
+		map = random:generate(map)
+		diff = true
 	end
 end
 

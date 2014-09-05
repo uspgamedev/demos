@@ -6,7 +6,8 @@ local automaton = {
 	size_x = 0, size_y = 0,
 	properties = {
 		neighbouring = 4,
-		limitant = 2
+		limitant = 2,
+		auto_remove = false
 	},
 	stack = nil,
 	stack_index = 0
@@ -23,6 +24,7 @@ end
 function automaton:transform()
 	local current, transformed = self.current, self.transformed
 	local limitant, neighbouring = self.properties.limitant, self.properties.neighbouring
+	local auto_remove = self.properties.auto_remove
 
 	self.stack:push(current)
 
@@ -39,7 +41,13 @@ function automaton:transform()
 				end
 			end
 
-			transformed[i][j] = (encounters > limitant) or current[i][j]
+			if encounters > limitant then
+				transformed[i][j] = true
+			elseif auto_remove then
+				transformed[i][j] = false
+			else
+				transformed[i][j] = current[i][j]
+			end
 		end
 	end
 
@@ -61,13 +69,18 @@ function automaton:prev()
 	return self.current
 end
 
-function CellAutomaton.new(map, _width, _height)
+function automaton:force_push()
+	self.stack:push(self.current)
+end
+
+function CellAutomaton.new(map, _width, _height, _properties)
 	local inst = setmetatable({}, {__index = automaton})
 	
 	inst.current = map
 	inst.stack = Stack.new()
 	inst.transformed = new_table(_height)
 	inst.size_x, inst.size_y = _width, _height
+	inst.properties = _properties
 
 	return inst
 end
