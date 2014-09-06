@@ -9,7 +9,7 @@ local qt = QuadTree.new{0, 0, 1024, 768}
 
 local white = {255, 255, 255}
 local red = {255, 0, 0}
-local green = {0, 255, 0}
+local blue = {0, 255, 255}
 
 local collision_alg = 2
 
@@ -24,8 +24,12 @@ function addRandomBall()
 	local e = {
 		rect = {rand(1024 - size), rand(768 - size), size, size, id = id},
 		speed = {rand(300) - 150, rand(200) - 100},
-		color = white
+		color = blue
 	}
+	e.last_pos = {e.rect[1], e.rect[2]}
+	for _, r in ipairs(rects) do
+		if trueCollides(e.rect, r.rect) then return end
+	end
 	id = id + 1
 	rects[#rects + 1] = e
 end
@@ -41,8 +45,7 @@ function noob_collision()
 		local r = rects[i]
 		for j = i + 1, #rects, 1 do
 			if trueCollides(r.rect, rects[j].rect) then
-				rects[j].color = red
-				r.color = green
+				handleCollision(r, rects[j])
 			end
 		end
 	end
@@ -56,10 +59,9 @@ function quad_collision()
 	
 	for _, e in ipairs(rects) do
 		local cols, n = qt:query(e.rect)
-		if n > 0 then e.color = green end
 		if cols then
 			for r in pairs(cols) do
-				if r ~= e and trueCollides(r.rect, e.rect) then r.color = red end
+				if trueCollides(r.rect, e.rect) then handleCollision(e, r) end
 			end
 		end
 	end
@@ -73,9 +75,8 @@ function quad2_collision()
 
 	for _, e in ipairs(rects) do
 		local cols = qt:query(e.rect)
-		if #cols > 0 then e.color = green end
 		for _, r in ipairs(cols) do
-			if e ~= r and trueCollides(e.rect, r.rect) then r.color = red end
+			if trueCollides(e.rect, r.rect) then handleCollision(e, r) end
 		end
 	end
 end
@@ -85,6 +86,8 @@ local collision = {noob_collision, quad_collision, quad2_collision}
 function love.update(dt)
 	last_dt = dt
 	for _, e in ipairs(rects) do
+		e.last_pos[1] = e.rect[1]
+		e.last_pos[2] = e.rect[2]
 		e.rect[1] = e.rect[1] + e.speed[1] * dt
 		e.rect[2] = e.rect[2] + e.speed[2] * dt
 		if e.rect[1] < 0 then
@@ -103,10 +106,17 @@ function love.update(dt)
 			e.speed[2] = -e.speed[2]
 			e.rect[2] = 768 - e.rect[4]
 		end
-		e.color = white
 	end
 
 	collision[collision_alg]()
+end
+
+function handleCollision(a, b)
+	a.speed, b.speed = b.speed, a.speed
+	for i = 1, 2 do
+		a.rect[i] = a.last_pos[i]
+		b.rect[i] = b.last_pos[i]
+	end
 end
 
 function draw_quad(q, color)
