@@ -13,7 +13,9 @@ local blue = {0, 255, 255}
 
 local collision_alg = 2
 
+local col_count = 0
 local function trueCollides(a, b)
+	col_count = col_count + 1
 	local d = (a[1] - b[1])^2 + (a[2] - b[2])^2
 	return d <= size^2
 end
@@ -108,6 +110,7 @@ function love.update(dt)
 		end
 	end
 
+	col_count = 0
 	collision[collision_alg]()
 end
 
@@ -145,6 +148,7 @@ function love.draw()
 	love.graphics.print("Balls: " .. #rects, 10, 10)
 	love.graphics.print("dt: " .. last_dt, 10, 25)
 	love.graphics.print("Collision: " .. collision_alg, 10, 40)
+	love.graphics.print("Col Checks: " .. col_count, 10, 55)
 end
 
 function love.mousepressed(x, y, but)

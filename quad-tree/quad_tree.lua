@@ -58,28 +58,27 @@ function QT:add(r)
 end
 
 function QT:query(rect)
-	return self:query_intern({}, {}, rect)
+	return self:query_intern({}, rect)
 end
 
-function QT:query_intern(seen, collided, rect)
+function QT:query_intern(seen, rect)
 	if not collidesRect(self.bounds, rect) then return nil, 0 end
 	local count = 0
 	if self.sect then
 		for i = 1, 4 do
-			local t, c = self.sect[i]:query_intern(seen, collided, rect)
+			local t, c = self.sect[i]:query_intern(seen, rect)
 			count = count + c
 		end
 	else
 		for _, r in ipairs(self.bodies) do
-			if not seen[r] and rect.id < r.rect.id and collidesRect(rect, r.rect) then
-				collided[r] = true
+			if not seen[r] and rect.id < r.rect.id then
+				seen[r] = true
 				count = count + 1
 			end
-			seen[r] = true
 		end
 	end
 
-	return collided, count
+	return seen, count
 end
 
 return QuadTree

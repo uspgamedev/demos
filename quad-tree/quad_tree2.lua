@@ -83,7 +83,7 @@ end
 
 function QT:query_intern(t, rect)
 	for _, e in ipairs(self.bodies) do
-		if rect.id < e.rect.id and collidesRect(rect, e.rect) then t[#t + 1] = e end
+		if rect.id < e.rect.id then t[#t + 1] = e end
 	end
 
 	if self.sect then
