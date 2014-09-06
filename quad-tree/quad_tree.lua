@@ -1,5 +1,5 @@
 local LIMIT = 6
-local MAX_LEVEL = 6
+local MAX_LEVEL = 5
 
 local QuadTree = {}
 
@@ -35,22 +35,22 @@ function QT:subdivide()
 		QuadTree.new({b[1] + w2, b[2] + h2, w2, h2}, self.level + 1)
 	}
 
-	for _, rect in ipairs(self.bodies) do
+	for _, r in ipairs(self.bodies) do
 		for i = 1, 4 do
-			self.sect[i]:add(rect)
+			self.sect[i]:add(r)
 		end
 	end
 	self.bodies = nil
 end
 
-function QT:add(rect)
-	if not collidesRect(rect.rect, self.bounds) then return end
+function QT:add(r)
+	if not collidesRect(r.rect, self.bounds) then return end
 	if self.sect then
-		for i = 1, 4 do self.sect[i]:add(rect) end
+		for i = 1, 4 do self.sect[i]:add(r) end
 		return
 	end
 
-	self.bodies[#self.bodies + 1] = rect
+	self.bodies[#self.bodies + 1] = r
 
 	if self.level < MAX_LEVEL and #self.bodies > LIMIT then
 		self:subdivide()

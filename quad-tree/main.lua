@@ -1,4 +1,5 @@
 local QuadTree = require "quad_tree"
+local QuadTree2 = require "quad_tree2"
 
 local rects = {}
 local size = 20
@@ -10,7 +11,7 @@ local white = {255, 255, 255}
 local red = {255, 0, 0}
 local green = {0, 255, 0}
 
-local using_quadtree = true
+local collision_alg = 2
 
 local function trueCollides(a, b)
 	local d = (a[1] - b[1])^2 + (a[2] - b[2])^2
@@ -61,6 +62,24 @@ function quad_collision()
 	end
 end
 
+function quad2_collision()
+	qt = QuadTree2.new{0, 0, 800, 600}
+	for _, e in ipairs(rects) do
+		qt:add(e)
+	end
+
+	for _, e in ipairs(rects) do
+		local l = qt:query(e.rect).head.next
+		while l do
+			local r = l.value
+			if r ~= e and trueCollides(r.rect, e.rect) then r.color = red end
+			l = l.next
+		end
+	end
+end
+
+local collision = {noob_collision, quad_collision, quad2_collision}
+
 function love.update(dt)
 	last_dt = dt
 	for _, e in ipairs(rects) do
@@ -85,7 +104,7 @@ function love.update(dt)
 		e.color = white
 	end
 
-	(using_quadtree and quad_collision or noob_collision)()
+	collision[collision_alg]()
 end
 
 function draw_quad(q, color)
@@ -100,8 +119,8 @@ function draw_quad(q, color)
 end
 
 function love.draw()
-	if using_quadtree then
-		draw_quad(qt, {0, 255, 0,  100})
+	if collision_alg > 1 then
+		draw_quad(qt, {0, 255, 0, 100})
 	end
 
 	for _, e in ipairs(rects) do
@@ -113,9 +132,12 @@ function love.draw()
 	love.graphics.setColor(white)
 	love.graphics.print("Balls: " .. #rects, 10, 10)
 	love.graphics.print("dt: " .. last_dt, 10, 25)
+	love.graphics.print("Collision: " .. collision_alg, 10, 40)
 end
 
 function love.mousepressed(x, y, but)
-	if but == 'l' then for i = 1, 3 do addRandomBall() end end
-	if but == 'r' then using_quadtree = not using_quadtree end
+	if but == 'l' then for i = 1, 10 do addRandomBall() end end
+	if but == 'r' then
+		collision_alg = (collision_alg % 3) + 1
+	end
 end
