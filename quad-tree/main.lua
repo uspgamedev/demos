@@ -5,7 +5,7 @@ local rects = {}
 local size = 20
 local last_dt = 0
 
-local qt = QuadTree.new{0, 0, 800, 600}
+local qt = QuadTree.new{0, 0, 1024, 768}
 
 local white = {255, 255, 255}
 local red = {255, 0, 0}
@@ -19,12 +19,14 @@ local function trueCollides(a, b)
 end
 
 local rand = math.random
+local id = 0
 function addRandomBall()
 	local e = {
-		rect = {rand(800 - size), rand(600 - size), size, size},
+		rect = {rand(1024 - size), rand(768 - size), size, size, id = id},
 		speed = {rand(300) - 150, rand(200) - 100},
 		color = white
 	}
+	id = id + 1
 	rects[#rects + 1] = e
 end
 
@@ -40,20 +42,21 @@ function noob_collision()
 		for j = i + 1, #rects, 1 do
 			if trueCollides(r.rect, rects[j].rect) then
 				rects[j].color = red
-				r.color = red
+				r.color = green
 			end
 		end
 	end
 end
 
 function quad_collision()
-	qt = QuadTree.new{0, 0, 800, 600}
+	qt = QuadTree.new{0, 0, 1024, 768}
 	for _, e in ipairs(rects) do
 		qt:add(e)
 	end
 	
 	for _, e in ipairs(rects) do
 		local cols, n = qt:query(e.rect)
+		if n > 0 then e.color = green end
 		if cols then
 			for r in pairs(cols) do
 				if r ~= e and trueCollides(r.rect, e.rect) then r.color = red end
@@ -63,17 +66,16 @@ function quad_collision()
 end
 
 function quad2_collision()
-	qt = QuadTree2.new{0, 0, 800, 600}
+	qt = QuadTree2.new{0, 0, 1024, 768}
 	for _, e in ipairs(rects) do
 		qt:add(e)
 	end
 
 	for _, e in ipairs(rects) do
-		local l = qt:query(e.rect).head.next
-		while l do
-			local r = l.value
-			if r ~= e and trueCollides(r.rect, e.rect) then r.color = red end
-			l = l.next
+		local cols = qt:query(e.rect)
+		if #cols > 0 then e.color = green end
+		for _, r in ipairs(cols) do
+			if e ~= r and trueCollides(e.rect, r.rect) then r.color = red end
 		end
 	end
 end
@@ -89,17 +91,17 @@ function love.update(dt)
 			e.speed[1] = -e.speed[1]
 			e.rect[1] = 0
 		end
-		if e.rect[1] + e.rect[3] > 800 then
+		if e.rect[1] + e.rect[3] > 1024 then
 			e.speed[1] = -e.speed[1]
-			e.rect[1] = 800 - e.rect[3]
+			e.rect[1] = 1024 - e.rect[3]
 		end
 		if e.rect[2] < 0 then
 			e.speed[2] = -e.speed[2]
 			e.rect[2] = 0
 		end
-		if e.rect[2] + e.rect[4] > 600 then
+		if e.rect[2] + e.rect[4] > 768 then
 			e.speed[2] = -e.speed[2]
-			e.rect[2] = 600 - e.rect[4]
+			e.rect[2] = 768 - e.rect[4]
 		end
 		e.color = white
 	end
@@ -136,7 +138,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, but)
-	if but == 'l' then for i = 1, 10 do addRandomBall() end end
+	if but == 'l' then for i = 1, 25 do addRandomBall() end end
 	if but == 'r' then
 		collision_alg = (collision_alg % 3) + 1
 	end

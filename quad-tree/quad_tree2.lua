@@ -1,5 +1,3 @@
-local List = require "list"
-
 local LIMIT = 6
 local MAX_LEVEL = 5
 
@@ -12,10 +10,18 @@ function QuadTree.new(...)
 	return setmetatable({}, meta):init(...)
 end
 
+local function collidesRect(a, b)
+	if a[1] > b[1] + b[3] then return false end
+	if a[1] + a[3] < b[1] then return false end
+	if a[2] > b[2] + b[4] then return false end
+	if a[2] + a[4] < b[2] then return false end
+	return true
+end
+
 function QT:init(bounds, level)
 	self.level = level or 1
 	self.bounds = bounds
-	self.bodies = List.new()
+	self.bodies = {}
 	return self
 end
 
@@ -28,8 +34,8 @@ function QT:getIndex(rect)
 	local left = rect[1] + rect[3] < mx
 	local right = rect[1] > mx
 
-	return up and (left and 1 or right and 2 or 0) or
-		down and (left and 3 or right and 4 or 0) or 0 --cryptic code
+	return up and (left and 1 or right and 2) or
+		down and (left and 3 or right and 4) --cryptic code
 end
 
 function QT:subdivide()
@@ -42,37 +48,43 @@ function QT:subdivide()
 		QuadTree.new({b[1] + w2, b[2] + h2, w2, h2}, self.level + 1)
 	}
 
-	local n = self.bodies.head.next
-	while n do
-		local i = self:getIndex(n.value.rect)
-		if i > 0 then
-			self.bodies:removeNode(n)
-			self.sect[i]:add(n.value)
+	local i = 1
+	while self.bodies[i] do
+		local ind = self:getIndex(self.bodies[i].rect)
+		if ind then
+			self.sect[ind]:add(self.bodies[i])
+			self.bodies[i] = self.bodies[#self.bodies]
+			self.bodies[#self.bodies] = nil
+		else
+			i = i + 1
 		end
-		n = n.next
 	end
 end
 
 function QT:add(r)
 	if self.sect then
 		local i = self:getIndex(r.rect)
-		if i > 0 then
+		if i then
 			self.sect[i]:add(r)
 			return
 		end
 	end
 
-	self.bodies:add(r)
+	self.bodies[#self.bodies + 1] = r
 
-	if not self.sect and self.level < MAX_LEVEL and self.bodies.size > LIMIT then
+	if not self.sect and self.level < MAX_LEVEL and #self.bodies > LIMIT then
 		self:subdivide()
 	end
 end
 
 function QT:query(rect)
-	local l = List.new()
+	return self:query_intern({}, rect)
+end
 
-	l:addList(self.bodies)
+function QT:query_intern(t, rect)
+	for _, e in ipairs(self.bodies) do
+		if rect.id < e.rect.id and collidesRect(rect, e.rect) then t[#t + 1] = e end
+	end
 
 	if self.sect then
 		local mx = self.bounds[1] + self.bounds[3]/2
@@ -83,13 +95,13 @@ function QT:query(rect)
 		local left = rect[1] < mx
 		local right = rect[1] + rect[3] > mx
 
-		if up and left    then l:spliceList(self.sect[1]:query(rect)) end
-		if up and right   then l:spliceList(self.sect[2]:query(rect)) end
-		if down and left  then l:spliceList(self.sect[3]:query(rect)) end
-		if down and right then l:spliceList(self.sect[4]:query(rect)) end
+		if up and left    then self.sect[1]:query_intern(t, rect) end
+		if up and right   then self.sect[2]:query_intern(t, rect) end
+		if down and left  then self.sect[3]:query_intern(t, rect) end
+		if down and right then self.sect[4]:query_intern(t, rect) end
 	end
 
-	return l
+	return t
 end
 
 return QuadTree

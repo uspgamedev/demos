@@ -31,7 +31,6 @@ function L:addList(l)
 end
 
 function L:add(v)
-	assert(v)
 	self.last.next = {value = v, prev = self.last}
 	self.last = self.last.next
 	self.size = self.size + 1

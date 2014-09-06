@@ -44,7 +44,7 @@ function QT:subdivide()
 end
 
 function QT:add(r)
-	if not collidesRect(r.rect, self.bounds) then return end
+	if not collidesRect(self.bounds, r.rect) then return end
 	if self.sect then
 		for i = 1, 4 do self.sect[i]:add(r) end
 		return
@@ -62,7 +62,7 @@ function QT:query(rect)
 end
 
 function QT:query_intern(seen, collided, rect)
-	if not collidesRect(rect, self.bounds) then return nil, 0 end
+	if not collidesRect(self.bounds, rect) then return nil, 0 end
 	local count = 0
 	if self.sect then
 		for i = 1, 4 do
@@ -71,7 +71,7 @@ function QT:query_intern(seen, collided, rect)
 		end
 	else
 		for _, r in ipairs(self.bodies) do
-			if not seen[r] and collidesRect(r.rect, rect) then
+			if not seen[r] and rect.id < r.rect.id and collidesRect(rect, r.rect) then
 				collided[r] = true
 				count = count + 1
 			end
