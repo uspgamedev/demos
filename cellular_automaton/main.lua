@@ -1,5 +1,7 @@
 local CellAutomaton = require "cell_automaton"
 local RandomGenerator = require "rand_gen"
+local PatternPair = require "pattern_pair"
+local Pattern = require "pattern"
 
 -- (Width, height) in pixels.
 local W, H = love.graphics.getWidth(), love.graphics.getHeight()
@@ -23,12 +25,25 @@ local random = nil
 -- Here goes all the Cellular Automaton configuration options:
 
 -- Randomization properties
-local randomization_density = 0.05
+local randomization_density = 0.1
 -- Algorithm properties
 local automaton_properties = {
 	auto_remove = true,
 	neighbouring = 4,
-	limitant = 2
+	limitant = 2,
+	uses_patterns = true,
+	patterns = {
+		PatternPair.new(
+			Pattern.new(
+				{1, 0, 1,
+				 0, 1, 0,
+				 1, 0, 1}, 3, 3),
+			Pattern.new(
+				{0, 1, 0,
+				 1, 0, 1,
+				 0, 1, 0}, 3, 3)
+		)
+	}
 }
 
 -- No more Cellular Automaton configuration options. Ye be forbidden to booty down 'ere! D:<

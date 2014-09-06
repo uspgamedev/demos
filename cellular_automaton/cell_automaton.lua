@@ -1,4 +1,6 @@
 local Stack = require "stack"
+local PatternPair = require "pattern_pair"
+local Pattern = require "pattern"
 
 local automaton = {
 	current = nil,
@@ -7,7 +9,20 @@ local automaton = {
 	properties = {
 		neighbouring = 4,
 		limitant = 2,
-		auto_remove = false
+		auto_remove = false,
+		uses_patterns = true,
+		patterns = {
+			PatternPair.new(
+				Pattern.new(
+					{1, 0, 1,
+					 0, 1, 0,
+					 1, 0, 1}, 3, 3),
+				Pattern.new(
+					{0, 1, 0,
+					 1, 0, 1,
+					 0, 1, 0}, 3, 3)
+			)
+		}
 	},
 	stack = nil,
 	stack_index = 0
@@ -21,7 +36,20 @@ local function new_table(n)
 	return t
 end
 
-function automaton:transform()
+function automaton:pattern_transform()
+	local current, transformed = self.current, self.transformed
+
+	self.stack:push(current)
+
+	for _,v in pairs(self.properties.patterns) do
+		print("Patterns found:", v:search(current, transformed, self.size_x, self.size_y))
+		self.current = self.transformed
+	end
+
+	self.transformed = new_table(self.size_x)
+end
+
+function automaton:point_transform()
 	local current, transformed = self.current, self.transformed
 	local limitant, neighbouring = self.properties.limitant, self.properties.neighbouring
 	local auto_remove = self.properties.auto_remove
@@ -53,6 +81,14 @@ function automaton:transform()
 
 	self.current = self.transformed
 	self.transformed = new_table(self.size_x)
+end
+
+function automaton:transform()
+	if self.properties.uses_patterns then
+		self:pattern_transform()
+	else
+		self:point_transform()
+	end
 end
 
 function automaton:next()
