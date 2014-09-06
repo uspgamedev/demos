@@ -13,8 +13,6 @@ function pattern:equals(map, x, y)
 		for j=0, self.height-1 do
 			if map[x+i][y+j] ~= pat[i][j] then
 				return false
-			else
-				print(i, j)
 			end
 		end
 	end
@@ -61,8 +59,7 @@ function Pattern.new(matrix, width, height)
 
 	for i=0, width-1 do
 		for j=0, height-1 do
-			local val = matrix[i + j*width]
-			inst.matrix[i][j] = (val==1)
+			inst.matrix[i][j] = (matrix[i+1][j+1]==1)
 		end
 	end
 

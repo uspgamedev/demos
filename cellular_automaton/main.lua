@@ -2,6 +2,7 @@ local CellAutomaton = require "cell_automaton"
 local RandomGenerator = require "rand_gen"
 local PatternPair = require "pattern_pair"
 local Pattern = require "pattern"
+local PatternGenerator = require "pattern_gen"
 
 -- (Width, height) in pixels.
 local W, H = love.graphics.getWidth(), love.graphics.getHeight()
@@ -21,6 +22,8 @@ local automaton = nil
 local diff = true
 -- Random generator.
 local random = nil
+-- Pattern generator.
+local pattern_gen = nil
 
 -- Here goes all the Cellular Automaton configuration options:
 
@@ -28,20 +31,20 @@ local random = nil
 local randomization_density = 0.1
 -- Algorithm properties
 local automaton_properties = {
-	auto_remove = true,
+	auto_remove = false,
 	neighbouring = 4,
 	limitant = 2,
-	uses_patterns = true,
+	uses_patterns = false,
 	patterns = {
 		PatternPair.new(
 			Pattern.new(
-				{1, 0, 1,
-				 0, 1, 0,
-				 1, 0, 1}, 3, 3),
+				{{1, 0, 1},
+				 {0, 1, 0},
+				 {1, 0, 1}}, 3, 3),
 			Pattern.new(
-				{0, 1, 0,
-				 1, 0, 1,
-				 0, 1, 0}, 3, 3)
+				{{0, 1, 0},
+				 {1, 0, 1},
+				 {0, 1, 0}}, 3, 3)
 		)
 	}
 }
@@ -57,6 +60,11 @@ function love.load()
 	end
 
 	random = RandomGenerator.new(randomization_density)
+	pattern_gen = PatternGenerator.new(Pattern.new(
+				{{1, 0, 1, 0},
+				 {0, 1, 0, 1},
+				 {1, 0, 1, 0},
+				 {0, 1, 0, 1}}, 4, 4))
 end
 
 function love.update(dt)
@@ -111,6 +119,13 @@ function love.keyreleased(key)
 	elseif key == 'r' then
 		map = random:generate(map)
 		diff = true
+	elseif key == 'p' then
+		map = pattern_gen:generate(map)
+		diff = true
+	elseif key == 'm' then
+		automaton_properties.uses_patterns = not automaton_properties.uses_patterns
+	elseif key == 'a' then
+		automaton_properties.auto_remove = not automaton_properties.auto_remove
 	end
 end
 
@@ -145,4 +160,10 @@ function love.draw()
 	if grid_mode then
 		draw_lines()
 	end
+
+	love.graphics.setColor(0, 0, 0)
+	love.graphics.print("Grid mode: "..tostring(grid_mode)..
+		"\nPattern mode: "..tostring(automaton_properties.uses_patterns)..
+		"\nAuto-remove mode: "..tostring(automaton_properties.auto_remove), 
+		10, H-50, nil, 1.2, 1.2)
 end

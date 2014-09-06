@@ -20,17 +20,13 @@ function pair:search(map, target, width, height)
 	local count = 0
 	local pat_width, pat_height = pat.width, pat.height
 
-	for i=0, (width-1)-pat_width do
-		for j=0, (height-1)-pat_height do
+	for i=0, width-pat_width do
+		for j=0, height-pat_height do
 			if pat:equals(map, i, j) then
 				anti:assign(target, i, j)
 				count = count + 1
-			else
-				for m=i, i+(pat_width-1) do
-					for n=j, j+(pat_height-1) do
-						target[m][n] = map[m][n]
-					end
-				end
+			elseif target[i][j] == nil then
+				target[i][j] = map[i][j]
 			end
 		end
 	end
