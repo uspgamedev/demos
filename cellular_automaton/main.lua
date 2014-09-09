@@ -32,7 +32,7 @@ local randomization_density = 0.1
 -- Algorithm properties
 local automaton_properties = {
 	auto_remove = false,
-	neighbouring = 4,
+	neighbouring = 3,
 	limitant = 2,
 	uses_patterns = false,
 	patterns = {
