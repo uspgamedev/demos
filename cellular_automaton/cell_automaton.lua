@@ -60,8 +60,8 @@ function automaton:point_transform()
 		for j=0, self.size_y-1 do
 			local encounters = 0
 
-			for p=-1, neighbouring-2 do
-				for q=-1, neighbouring-2 do
+			for p=-math.floor(neightbouring/2), math.floor(neighbouring/2) do
+				for q=-math.floor(neighbouring/2), math.floor(neighbouring/2) do
 					local x, y = i + p, j + q
 					if ((x >= 0  and y >= 0) and (x < self.size_x and y < self.size_y)) and current[x][y] then
 						encounters = encounters + 1
