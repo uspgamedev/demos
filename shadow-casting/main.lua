@@ -9,7 +9,8 @@ local bodies = {}
 _G.properties = {
 	entities = bodies,
 	width = W,
-	height = H
+	height = H,
+	strings_mode = false
 }
 
 local _wall = nil
@@ -63,6 +64,8 @@ function love.keypressed(key)
 		for i,v in pairs(bodies) do
 			bodies[i] = nil
 		end
+	elseif key == 's' then
+		_G.properties.string_mode = not _G.properties.string_mode
 	end
 end
 
@@ -87,4 +90,10 @@ function love.draw()
 	for _,v in pairs(bodies) do
 		v:draw()
 	end
+
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.print("String mode: "..tostring(_G.properties.string_mode)..
+		"\nNumber of walls: "..tostring(#_G.properties.entities)..
+		"\nNumber of points: "..tostring(6*#_G.properties.entities), 
+		10, H-50, nil, 1.2, 1.2)
 end

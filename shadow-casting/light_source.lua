@@ -42,6 +42,14 @@ function light_source:draw()
 	love.graphics.circle("fill", 0, 0, 10, 5)
 	
 	love.graphics.pop()
+
+	if not _G.properties.string_mode then return end
+	
+	love.graphics.setColor(125, 125, 125)
+	for _,v in pairs(_G.properties.entities) do
+		love.graphics.line(x, y, v.points[1], v.points[2])
+		love.graphics.line(x, y, v.points[3], v.points[4])
+	end
 end
 
 function light_source:update()
