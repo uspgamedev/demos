@@ -17,8 +17,12 @@ function Wall.new(x1, y1, x2, y2)
 end
 
 function wall:draw()
-	love.graphics.setColor(50, 50, 50)
+	local lw = love.graphics.getLineWidth()
+	
+	love.graphics.setColor(75, 75, 75)
+	love.graphics.setLineWidth(lw*5)
 	love.graphics.line(unpack(self.points))
+	love.graphics.setLineWidth(lw)
 
 	self.shadow:draw()
 end
