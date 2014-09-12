@@ -40,6 +40,7 @@ function love.load()
 	math.randomseed(os.time())
 	rand() rand()
 	addRandomBall()
+  love.graphics.setFont(love.graphics.newFont(36))
 end
 
 function noob_collision()
@@ -144,11 +145,12 @@ function love.draw()
 		love.graphics.circle('fill', r[1] + r[3]/2, r[2] + r[4]/2, r[3]/2)
 	end
 
-	love.graphics.setColor(white)
+	love.graphics.setColor(180, 120, 80, 255)
+  local dh = love.graphics.getFont():getHeight()
 	love.graphics.print("Balls: " .. #rects, 10, 10)
-	love.graphics.print("dt: " .. last_dt, 10, 25)
-	love.graphics.print("Collision: " .. collision_alg, 10, 40)
-	love.graphics.print("Col Checks: " .. col_count, 10, 55)
+	love.graphics.print("FPS: " .. string.format("%.1d", 1/last_dt), 10, 10+dh)
+	love.graphics.print("Collision: " .. collision_alg, 10, 10+2*dh)
+	love.graphics.print("Col Checks: " .. col_count, 10, 10+3*dh)
 end
 
 function love.mousepressed(x, y, but)
