@@ -32,24 +32,6 @@ function QT:init(bounds)
 	return self
 end
 
-function QT:subdivide()
-	local b = self.bounds
-	local w2, h2 = b[3]/2, b[4]/2
-	self.sect = {
-		QuadTree.new({b[1], b[2], w2, h2}, self.level + 1),
-		QuadTree.new({b[1] + w2, b[2], w2, h2}, self.level + 1),
-		QuadTree.new({b[1], b[2] + h2, w2, h2}, self.level + 1),
-		QuadTree.new({b[1] + w2, b[2] + h2, w2, h2}, self.level + 1)
-	}
-
-	for _, r in ipairs(self.bodies) do
-		for i = 1, 4 do
-			self.sect[i]:add(r)
-		end
-	end
-	self.bodies = nil
-end
-
 function QT:add(body, node)
   node = node or self.root
 	if node.level < MAX_LEVEL and #node.bodies+1 > LIMIT then
@@ -67,6 +49,24 @@ function QT:add(body, node)
   end
   node.bodies[body] = true
   self.allbodies[body] = node
+end
+
+function QT:subdivide()
+	local b = self.bounds
+	local w2, h2 = b[3]/2, b[4]/2
+	self.sect = {
+		QuadTree.new({b[1], b[2], w2, h2}, self.level + 1),
+		QuadTree.new({b[1] + w2, b[2], w2, h2}, self.level + 1),
+		QuadTree.new({b[1], b[2] + h2, w2, h2}, self.level + 1),
+		QuadTree.new({b[1] + w2, b[2] + h2, w2, h2}, self.level + 1)
+	}
+
+	for _, r in ipairs(self.bodies) do
+		for i = 1, 4 do
+			self.sect[i]:add(r)
+		end
+	end
+	self.bodies = nil
 end
 
 function QT:query(rect)
