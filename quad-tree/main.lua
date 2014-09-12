@@ -26,7 +26,7 @@ function addRandomBall()
 	local e = {
 		rect = {rand(1024 - size), rand(768 - size), size, size, id = id},
 		speed = {rand(300) - 150, rand(200) - 100},
-		color = blue
+		color = {150, 150, 150}
 	}
 	e.last_pos = {e.rect[1], e.rect[2]}
 	for _, r in ipairs(rects) do
@@ -145,12 +145,12 @@ function love.draw()
 		love.graphics.circle('fill', r[1] + r[3]/2, r[2] + r[4]/2, r[3]/2)
 	end
 
-	love.graphics.setColor(180, 120, 80, 255)
+	love.graphics.setColor(blue)
   local dh = love.graphics.getFont():getHeight()
 	love.graphics.print("Balls: " .. #rects, 10, 10)
-	love.graphics.print("FPS: " .. string.format("%.1d", 1/last_dt), 10, 10+dh)
-	love.graphics.print("Collision: " .. collision_alg, 10, 10+2*dh)
-	love.graphics.print("Col Checks: " .. col_count, 10, 10+3*dh)
+	love.graphics.print("Collision: " .. collision_alg, 10, 10+1*dh)
+	love.graphics.print("Col Checks: " .. col_count, 10, 10+2*dh)
+	--love.graphics.print("FPS: " .. string.format("%.1d", 1/last_dt), 10, 10+3*dh)
 end
 
 function love.mousepressed(x, y, but)
