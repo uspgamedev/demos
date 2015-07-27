@@ -65,8 +65,8 @@ function light_source:update()
 		local polygon = v.shadow.vertices
 
 		polygon[1], polygon[2] = x1, y1
-		polygon[3], polygon[4] = W*(x1-px), H*(y1-py)
-		polygon[5], polygon[6] = H*(x2-px), H*(y2-py)
+		polygon[3], polygon[4] = x1 + W*(x1-px), y1 + H*(y1-py)
+		polygon[5], polygon[6] = x2 + W*(x2-px), y2 + H*(y2-py)
 		polygon[7], polygon[8] = x2, y2
 	
 		v.shadow.active = true
