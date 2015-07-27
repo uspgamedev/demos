@@ -1,6 +1,7 @@
 #!/usr/bin/lua
 
 local demos = {
+  "binary_search",
   "cellular_automaton",
   "quad-tree",
   "shadow-casting"
@@ -28,10 +29,8 @@ while true do
   local which = io.read()
   if which == 'q' then break end
   local index = tonumber(which)
-  if which then
+  if index then
     os.execute(string.format("love %s", demos[index]))
-  else
-    print "Use o número!"
   end
 end
 
