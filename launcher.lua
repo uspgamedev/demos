@@ -4,7 +4,8 @@ local demos = {
   "binary_search",
   "cellular_automaton",
   "quad-tree",
-  "shadow-casting"
+  "shadow-casting",
+  "stack"
 }
 
 local menu_text = [[
