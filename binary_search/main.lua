@@ -7,7 +7,7 @@ local biggerfont
 
 local buttons
 
-local current
+local current, p, q
 local searcher
 local P, Q
 local tries
@@ -35,7 +35,7 @@ local function binsearch ()
   return coroutine.wrap(function (p, q)
     while true do
       local m = math.floor((p+q)/2)
-      if coroutine.yield(m) then
+      if coroutine.yield(m, p, q) then
         p, q = m+1, q
       else
         p, q = p, m
@@ -55,7 +55,7 @@ function love.load ()
   biggerfont = graphics.newFont(64)
   P, Q = 1, 1000
   tries = 1
-  current = searcher(P, Q)
+  current, p, q = searcher(P, Q)
   -- UI
   buttons = {
     makeButton(W/2, 4*H/6, "YES", {100, 255, 100, 255}),
@@ -69,9 +69,9 @@ end
 
 function love.keypressed (key)
   if key == 'left' then
-    current = searcher(false)
+    current, p, q = searcher(false)
   elseif key == 'right' then
-    current = searcher(true)
+    current, p, q = searcher(true)
   elseif key == 'escape' then
     love.load()
   end
@@ -81,9 +81,9 @@ function love.mousepressed (x, y, button)
   local button = getButton(x, y)
   if not button then return end
   if button.text == 'SMALLER' then
-    current = searcher(false)
+    current, p, q = searcher(false)
   elseif button.text == 'GREATER' then
-    current = searcher(true)
+    current, p, q = searcher(true)
   end
 end
 
@@ -103,7 +103,13 @@ function love.draw ()
   graphics.setColor(255, 255, 255, 255)
   -- Interval line
   graphics.setFont(smallfont)
+  graphics.setLineWidth(1)
   graphics.line(W/8, 64, 7*W/8, 64)
+  graphics.setLineWidth(4)
+  graphics.setColor(100, 100, 255, 255)
+  graphics.line(W/8 + (6*W/8)*((p-P)/(Q-P)), 64,
+                W/8 + (6*W/8)*((q-P)/(Q-P)), 64)
+  graphics.setColor(255, 255, 255, 255)
   graphics.point(W/8, 64)
   graphics.printf(P, W/8 - 16, 64 + 12, 32, 'center')
   graphics.point(7*W/8, 64)
