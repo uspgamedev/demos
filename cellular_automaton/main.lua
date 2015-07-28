@@ -33,7 +33,7 @@ local randomization_density = 0.1
 local automaton_properties = {
 	auto_remove = false,
 	neighbouring = 3,
-	limitant = 1,
+	limitant = 2,
 	uses_patterns = false,
 	patterns = {
 		PatternPair.new(
