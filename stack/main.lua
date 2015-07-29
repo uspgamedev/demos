@@ -120,6 +120,7 @@ function love.load ()
 end
 
 function love.mousereleased (x, y, button)
+  if processor then return end
   for i,button in ipairs(buttons) do
     if  x > button.x and x < button.x + button.w and
         y > button.y and y < button.y + button.h then
