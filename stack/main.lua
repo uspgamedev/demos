@@ -4,6 +4,8 @@ local yield = coroutine.yield
 local W, H
 local graphics
 local transfer
+local buttons
+local fonts
 
 local input, stack
 local calculator
@@ -73,13 +75,52 @@ local function makeUpdater ()
   end)
 end
 
+local function makeButton (token, x, y, w, h)
+  return {
+    token = token,
+    x = x, y = y, w = w, h = h
+  }
+end
+
 function love.load ()
   graphics = love.graphics
   W, H = love.window.getDimensions()
   transfer = 0
   input, stack = {}, {}
   calculator = coroutine.wrap(process)
-  graphics.setFont(graphics.newFont(22))
+  buttons = {}
+  fonts = {
+    normal = graphics.newFont(22),
+    button = graphics.newFont(32)
+  }
+  buttons[1] = makeButton(1, W/3, H/3, 64, 64)
+  buttons[2] = makeButton(2, W/3 + 96, H/3, 64, 64)
+  buttons[3] = makeButton(3, W/3 + 2*96, H/3, 64, 64)
+  buttons[4] = makeButton(4, W/3, H/3 + 96, 64, 64)
+  buttons[5] = makeButton(5, W/3 + 96, H/3 + 96, 64, 64)
+  buttons[6] = makeButton(6, W/3 + 2*96, H/3 + 96, 64, 64)
+  buttons[7] = makeButton(7, W/3, H/3 + 2*96, 64, 64)
+  buttons[8] = makeButton(8, W/3 + 96, H/3 + 2*96, 64, 64)
+  buttons[9] = makeButton(9, W/3 + 2*96, H/3 + 2*96, 64, 64)
+  buttons[10] = makeButton(0, W/3, H/3 + 3*96, 64 + 96, 64)
+  buttons[11] = makeButton('=', W/3 + 2*96, H/3 + 3*96, 64, 64)
+  buttons[12] = makeButton('+', W/3 + 3*96, H/3, 64, 64)
+  buttons[13] = makeButton('-', W/3 + 3*96, H/3 + 96, 64, 64)
+  buttons[14] = makeButton('*', W/3 + 3*96, H/3 + 2*96, 64, 64)
+  buttons[15] = makeButton('/', W/3 + 3*96, H/3 + 3*96, 64, 64)
+end
+
+function love.mousepressed (x, y, button)
+  for i,button in ipairs(buttons) do
+    if  x > button.x and x < button.x + button.w and
+        y > button.y and y < button.y + button.h then
+      if button.token == '=' then
+        love.update = makeUpdater()
+      else
+        table.insert(input, button.token)
+      end
+    end
+  end
 end
 
 function love.keypressed (key)
@@ -100,6 +141,7 @@ function love.textinput (key)
 end
 
 function love.draw ()
+  graphics.setFont(fonts.normal)
   graphics.setColor(255, 255, 255, 255)
   do -- Input
     graphics.push()
@@ -111,6 +153,20 @@ function love.draw ()
       end
     end
     graphics.pop()
+  end
+  do -- Buttons
+    graphics.setFont(fonts.button)
+    local h = fonts.button:getHeight()
+    for _,button in ipairs(buttons) do
+      graphics.push()
+      graphics.translate(button.x, button.y)
+      graphics.setColor(120, 120, 120, 255)
+      graphics.rectangle('fill', 0, 0, button.w, button.h)
+      graphics.setColor(255, 255, 255, 255)
+      graphics.printf(button.token, 0, button.h/2 - h/2, button.w, 'center')
+      graphics.pop()
+    end
+    graphics.setFont(fonts.normal)
   end
   do -- Stack
     graphics.push()
@@ -125,6 +181,9 @@ function love.draw ()
       graphics.printf(input[1],
                       0, (transfer)*(MAX_SIZE-#stack-1)*DH,
                       DW, 'center')
+      if type(input[1]) == 'string' then
+        graphics.rectangle('line', 0, (MAX_SIZE - #stack)*DH - 2, DW, 2*DH + 4)
+      end
     end
     -- Stack content
     for i,token in ipairs(stack) do
