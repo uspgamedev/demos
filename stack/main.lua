@@ -9,6 +9,7 @@ local fonts
 
 local input, stack
 local calculator
+local processor
 
 local MAX_SIZE = 16
 local DW, DH = 40, 24
@@ -41,12 +42,19 @@ local OP = {
 local function process ()
   while #input > 0 do
     local token = input[1]
-    if type(token) == 'number' then
+    if token == 'ERR' then
+      print("Oooppps")
+    elseif type(token) == 'number' then
       table.insert(stack, token)
     elseif type(token) == 'string' then
-      -- WARNING: order must be inverted
-      local y, x = table.remove(stack), table.remove(stack)
-      table.insert(stack, OP[token](x, y))
+      if  type(stack[#stack]) ~= 'number' or type(stack[#stack - 1]) ~= 'number'
+          then
+        stack = { 'ERR' }
+      else
+        -- WARNING: order must be inverted
+        local y, x = table.remove(stack), table.remove(stack)
+        table.insert(stack, OP[token](x, y))
+      end
     end
     table.remove(input, 1)
     yield(#input <= 0)
@@ -63,7 +71,7 @@ local function makeUpdater ()
       end
       transfer = 0
       if calculator() then
-        love.update = nil
+        processor = nil
         break
       end
       local time = DELAY
@@ -108,14 +116,18 @@ function love.load ()
   buttons[13] = makeButton('-', W/3 + 3*96, H/3 + 96, 64, 64)
   buttons[14] = makeButton('*', W/3 + 3*96, H/3 + 2*96, 64, 64)
   buttons[15] = makeButton('/', W/3 + 3*96, H/3 + 3*96, 64, 64)
+  buttons[16] = makeButton('CLEAR', W/3 + 4*96, H/3, 128, 64)
 end
 
-function love.mousepressed (x, y, button)
+function love.mousereleased (x, y, button)
   for i,button in ipairs(buttons) do
     if  x > button.x and x < button.x + button.w and
         y > button.y and y < button.y + button.h then
       if button.token == '=' then
-        love.update = makeUpdater()
+        processor = makeUpdater()
+      elseif button.token == 'CLEAR' then
+        processor = nil
+        love.load()
       else
         table.insert(input, button.token)
       end
@@ -125,18 +137,33 @@ end
 
 function love.keypressed (key)
   if key == 'return' then
-    love.update = makeUpdater()
+    processor = makeUpdater()
   elseif key == 'escape' then
-    love.update = nil
+    processor = nil
     love.load()
   end
 end
 
 function love.textinput (key)
-  if love.update then return end
+  if processor then return end
   local token = tonumber(key) or key
   if VALID[token] and #input < 16 then
     table.insert(input, token)
+  end
+end
+
+function love.update (dt)
+  if love.mouse.isDown 'l' then
+    local x, y = love.mouse.getPosition()
+    for _,button in ipairs(buttons) do
+      if  x > button.x and x < button.x + button.w and
+          y > button.y and y < button.y + button.h then
+        button.pressed = true
+      end
+    end
+  end
+  if processor then
+    processor(dt)
   end
 end
 
@@ -159,7 +186,12 @@ function love.draw ()
     local h = fonts.button:getHeight()
     for _,button in ipairs(buttons) do
       graphics.push()
-      graphics.translate(button.x, button.y)
+      if button.pressed then
+        graphics.translate(button.x + 4, button.y + 4)
+      else
+        graphics.translate(button.x, button.y)
+      end
+      button.pressed = false
       graphics.setColor(120, 120, 120, 255)
       graphics.rectangle('fill', 0, 0, button.w, button.h)
       graphics.setColor(255, 255, 255, 255)
