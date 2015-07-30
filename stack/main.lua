@@ -14,6 +14,7 @@ local processor
 local MAX_SIZE = 16
 local DW, DH = 40, 24
 local DELAY = .5
+local TRANSFER = .6
 
 local VALID = {
   [0] = true,
@@ -65,7 +66,7 @@ local function makeUpdater ()
   return coroutine.wrap(function (dt)
     local finished
     while true do
-      while transfer < 1 do
+      while transfer < TRANSFER do
         transfer = math.min(transfer + dt, 1)
         dt = yield()
       end
@@ -117,6 +118,7 @@ function love.load ()
   buttons[14] = makeButton('*', W/3 + 3*96, H/3 + 2*96, 64, 64)
   buttons[15] = makeButton('/', W/3 + 3*96, H/3 + 3*96, 64, 64)
   buttons[16] = makeButton('CLEAR', W/3 + 4*96, H/3, 128, 64)
+  graphics.setBackgroundColor(90, 90, 90, 255)
 end
 
 function love.mousereleased (x, y, button)
@@ -175,6 +177,9 @@ function love.draw ()
     graphics.push()
     graphics.translate(W/10, 32)
     graphics.print("Input:", 0, 0)
+    graphics.setColor(0, 0, 0, 255)
+    graphics.rectangle('fill', 0, 64 - DH/2, MAX_SIZE*DW, 2*DH)
+    graphics.setColor(255, 255, 255, 255)
     for i,token in ipairs(input) do
       if i > 1 or transfer <= 0 then
         graphics.printf(token, (i-1)*DW, 64, DW, 'center')
@@ -193,7 +198,7 @@ function love.draw ()
         graphics.translate(button.x, button.y)
       end
       button.pressed = false
-      graphics.setColor(120, 120, 120, 255)
+      graphics.setColor(120, 120, 180, 255)
       graphics.rectangle('fill', 0, 0, button.w, button.h)
       graphics.setColor(255, 255, 255, 255)
       graphics.printf(button.token, 0, button.h/2 - h/2, button.w, 'center')
@@ -204,7 +209,7 @@ function love.draw ()
   do -- Stack
     graphics.push()
     graphics.translate(W/10, 128 + 32 + 16)
-    graphics.setColor(40, 40, 40, 255)
+    graphics.setColor(150, 80, 40, 255)
     graphics.rectangle('fill', -DW/4, -DH/2, 1.5*DW, (MAX_SIZE + 1)*DH)
     graphics.setColor(200, 150, 20, 255)
     graphics.rectangle('line', -DW/4, -DH/2, 1.5*DW, (MAX_SIZE + 1)*DH)
@@ -212,15 +217,23 @@ function love.draw ()
     -- Falling number
     if transfer > 0 then
       graphics.printf(input[1],
-                      0, (transfer)*(MAX_SIZE-#stack-1)*DH,
+                      0, (transfer/TRANSFER)*(MAX_SIZE-#stack-1)*DH,
                       DW, 'center')
       if type(input[1]) == 'string' then
-        graphics.rectangle('line', 0, (MAX_SIZE - #stack)*DH - 2, DW, 2*DH + 4)
+        graphics.rectangle('line', -4, (MAX_SIZE - #stack)*DH - 2,
+                           DW + 8, 2*DH + 4)
       end
     end
     -- Stack content
     for i,token in ipairs(stack) do
-      graphics.printf(token, 0, (MAX_SIZE - i)*DH, DW, 'center')
+      local view
+      if  type(token) == 'number' and
+          math.abs(math.floor(token) - token) > 1e-10 then
+        view = string.format("%.2f", token)
+      else
+        view = token
+      end
+      graphics.printf(view, 0, (MAX_SIZE - i)*DH, DW, 'center')
     end
     graphics.pop()
   end
