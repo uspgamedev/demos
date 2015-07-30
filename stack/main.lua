@@ -67,8 +67,14 @@ local function makeUpdater ()
     local finished
     while true do
       while transfer < TRANSFER do
-        transfer = math.min(transfer + dt, 1)
-        dt = yield()
+        transfer = math.min(transfer + yield(), 1)
+      end
+      -- Pause if operator
+      if type(input[1]) == 'string' then
+        local wait = 1
+        while wait > 0 do
+          wait = wait - yield()
+        end
       end
       transfer = 0
       if calculator() then
@@ -77,8 +83,7 @@ local function makeUpdater ()
       end
       local time = DELAY
       while time > 0 do
-        time = time - dt
-        dt = yield()
+        time = time - yield()
       end
     end
   end)
@@ -217,7 +222,7 @@ function love.draw ()
     -- Falling number
     if transfer > 0 then
       graphics.printf(input[1],
-                      0, (transfer/TRANSFER)*(MAX_SIZE-#stack-1)*DH,
+                      0, (transfer/TRANSFER)*(MAX_SIZE-#stack-1.5)*DH,
                       DW, 'center')
       if type(input[1]) == 'string' then
         graphics.rectangle('line', -4, (MAX_SIZE - #stack)*DH - 2,
