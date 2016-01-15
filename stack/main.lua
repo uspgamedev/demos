@@ -98,7 +98,7 @@ end
 
 function love.load ()
   graphics = love.graphics
-  W, H = love.window.getDimensions()
+  W, H = graphics.getDimensions()
   transfer = 0
   input, stack = {}, {}
   calculator = coroutine.wrap(process)
@@ -161,7 +161,7 @@ function love.textinput (key)
 end
 
 function love.update (dt)
-  if love.mouse.isDown 'l' then
+  if love.mouse.isDown(1) then
     local x, y = love.mouse.getPosition()
     for _,button in ipairs(buttons) do
       if  x > button.x and x < button.x + button.w and
