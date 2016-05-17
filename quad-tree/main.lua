@@ -154,8 +154,8 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, but)
-	if but == 'l' then for i = 1, 25 do addRandomBall() end end
-	if but == 'r' then
+	if but == 1 then for i = 1, 25 do addRandomBall() end end
+	if but == 2 then
 		collision_alg = (collision_alg % 2) + 1
 	end
 end
