@@ -72,10 +72,10 @@ function love.update(dt)
 	local x, y = love.mouse.getX(), love.mouse.getY()
 	local px, py = math.floor(x/dx), math.floor(y/dy)
 	
-	if love.mouse.isDown('l') then
+	if love.mouse.isDown(1) then
 		map[px][py] = true
 		diff = true
-	elseif love.mouse.isDown('r') then
+	elseif love.mouse.isDown(2) then
 		map[px][py] = false
 		diff = true
 	end
